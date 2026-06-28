@@ -38,6 +38,6 @@ Spotify-Song-Downloader/
 **Yogit Kumar**
 
 - GitHub: https://github.com/YogitKumar-a11y
-- LinkedIn: https://www.linkedin.com/in/yogit-kumar
+- LinkedIn: https://www.linkedin.com/in/yogit-k-6ba895332?utm_source=share_via&utm_content=profile&utm_medium=member_android
 
 ⭐ If you like this project, consider starring the repository!
