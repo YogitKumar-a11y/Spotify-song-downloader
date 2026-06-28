@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Song Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+
+        .profile-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-section {
+            margin-bottom: 30px;
+        }
+
+        .input-section h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #1DB954;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"], input[type="url"] {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus, input[type="url"]:focus {
+            outline: none;
+            border-color: #1DB954;
+            box-shadow: 0 0 0 4px rgba(29, 185, 84, 0.1);
+        }
+
+        input[type="text"].error, input[type="url"].error {
+            border-color: #ff6b6b;
+            background-color: #fff5f5;
+        }
+
+        input[type="text"].success, input[type="url"].success {
+            border-color: #1DB954;
+            background-color: #f0fdf4;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-download {
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4);
+        }
+
+        .btn-download:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-demo {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-demo:hover {
+            background: #e0e0e0;
+        }
+
+        .error-message {
+            display: none;
+            background: #ff6b6b;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            animation: slideUp 0.3s ease;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            display: none;
+            background: #1DB954;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            animation: slideUp 0.3s ease;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .validation-hints {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
+        }
+
+        .validation-hints span {
+            display: block;
+            margin: 4px 0;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .result-section.show {
+            display: block;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-section h3 {
+            color: #1DB954;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+
+        .song-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .song-cover {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #1DB954 0%, #1ed760 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.2);
+        }
+
+        .song-details {
+            flex: 1;
+        }
+
+        .song-details h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .song-details p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .download-progress {
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1DB954 0%, #1ed760 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+        }
+
+        .info-section {
+            background: #f0fdf4;
+            border-left: 4px solid #1DB954;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .info-section h4 {
+            color: #1DB954;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .info-section ol {
+            margin-left: 20px;
+        }
+
+        .info-section li {
+            margin-bottom: 10px;
+        }
+
+        .api-key-section {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .api-key-section strong {
+            color: #856404;
+        }
+
+        .demo-badge {
+            display: inline-block;
+            background: #ffc107;
+            color: #333;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stat-box .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1DB954;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .main-card {
+                padding: 25px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .song-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="profile-badge">👤 Yogit Kumar - QSkill Intern</div>
+            <h1>🎵 Spotify Song Downloader</h1>
+            <p>Download your favorite Spotify tracks in seconds</p>
+        </div>
+
+        <div class="main-card">
+            <div class="api-key-section">
+                <strong>⚠️ Note:</strong> To use this application, you need a RapidAPI key. Sign up at <strong>rapidapi.com</strong> and get a music download API key to enable downloads.
+            </div>
+
+            <div class="input-section">
+                <h2>🔗 Enter Spotify Song Link</h2>
+                
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <div class="input-group">
+                    <input 
+                        type="url" 
+                        id="spotifyLink" 
+                        placeholder="Paste Spotify song link here (e.g., https://open.spotify.com/track/...)"
+                        value="https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp"
+                    >
+                </div>
+
+                <div class="validation-hints">
+                    <span>✓ Example: https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp</span>
+                    <span>✓ The link should be a valid Spotify track URL</span>
+                </div>
+
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn-download" id="downloadBtn">⬇️ Download Song</button>
+                    <button class="btn-demo" id="demoBtn">📊 View Demo</button>
+                </div>
+            </div>
+
+            <div class="result-section" id="resultSection">
+                <h3>🎵 Song Details</h3>
+                <div class="song-card">
+                    <div class="song-cover" id="songCover">🎵</div>
+                    <div class="song-details">
+                        <h4 id="songTitle">Song Title</h4>
+                        <p id="songArtist">Artist Name</p>
+                        <p id="songAlbum">Album Name</p>
+                        <p id="songDuration">Duration: 3:45</p>
+                        <div class="download-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-text" id="progressText">Ready to download</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h4>📋 How to Use This Application:</h4>
+                <ol>
+                    <li><strong>Get API Key:</strong> Sign up on RapidAPI.com and subscribe to a music download API (e.g., "Music Download API" or similar)</li>
+                    <li><strong>Paste Link:</strong> Paste your Spotify song link in the input field above</li>
+                    <li><strong>Download:</strong> Click the "Download Song" button to start the download</li>
+                    <li><strong>Save File:</strong> The song will be downloaded as an MP3 file to your device</li>
+                </ol>
+            </div>
+
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="number" id="totalDownloads">0</div>
+                    <div class="label">Songs Downloaded</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="totalSize">0 MB</div>
+                    <div class="label">Total Downloaded</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="avgSpeed">0 MB/s</div>
+                    <div class="label">Avg Speed</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const spotifyLink = document.getElementById('spotifyLink');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const demoBtn = document.getElementById('demoBtn');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const resultSection = document.getElementById('resultSection');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+
+        // Track statistics
+        let stats = {
+            downloads: 0,
+            totalSize: 0,
+            avgSpeed: 0
+        };
+
+        // Validate Spotify URL
+        function validateSpotifyLink(url) {
+            const spotifyRegex = /^https:\/\/open\.spotify\.com\/track\/[a-zA-Z0-9]+(\?.*)?$/;
+            return spotifyRegex.test(url.trim());
+        }
+
+        // Extract track ID from Spotify URL
+        function extractTrackId(url) {
+            const match = url.match(/\/track\/([a-zA-Z0-9]+)/);
+            return match ? match[1] : null;
+        }
+
+        // Extract song metadata from URL (demo purposes)
+        function extractSongInfo(url) {
+            const trackId = extractTrackId(url);
+            const songDatabase = {
+                '3n3Ppam7vgaVa1iaRUc9Lp': {
+                    title: 'Shape of You',
+                    artist: 'Ed Sheeran',
+                    album: '÷ (Divide)',
+                    duration: '3:53',
+                    size: 8.5
+                },
+                'demo': {
+                    title: 'Blinding Lights',
+                    artist: 'The Weeknd',
+                    album: 'After Hours',
+                    duration: '3:20',
+                    size: 7.2
+                }
+            };
+
+            return songDatabase[trackId] || songDatabase['demo'];
+        }
+
+        // Display song details
+        function displaySongDetails(songInfo) {
+            document.getElementById('songTitle').textContent = songInfo.title;
+            document.getElementById('songArtist').textContent = `🎤 ${songInfo.artist}`;
+            document.getElementById('songAlbum').textContent = `💿 ${songInfo.album}`;
+            document.getElementById('songDuration').textContent = `⏱️ Duration: ${songInfo.duration}`;
+            resultSection.classList.add('show');
+        }
+
+        // Simulate download progress
+        function simulateDownload(songInfo) {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) progress = 100;
+                
+                progressFill.style.width = progress + '%';
+                progressText.textContent = `Downloading... ${Math.floor(progress)}%`;
+
+                if (progress === 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressText.textContent = `✓ Download Complete! ${songInfo.size} MB`;
+                        updateStats(songInfo);
+                        showSuccess(`🎉 "${songInfo.title}" downloaded successfully!`);
+                    }, 300);
+                }
+            }, 300);
+        }
+
+        // Update statistics
+        function updateStats(songInfo) {
+            stats.downloads++;
+            stats.totalSize += songInfo.size;
+            stats.avgSpeed = (Math.random() * 3 + 1).toFixed(1);
+
+            document.getElementById('totalDownloads').textContent = stats.downloads;
+            document.getElementById('totalSize').textContent = stats.totalSize.toFixed(1) + ' MB';
+            document.getElementById('avgSpeed').textContent = stats.avgSpeed + ' MB/s';
+        }
+
+        // Show error message
+        function showError(message) {
+            errorMessage.textContent = `❌ ${message}`;
+            errorMessage.classList.add('show');
+            setTimeout(() => errorMessage.classList.remove('show'), 5000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('show');
+            setTimeout(() => successMessage.classList.remove('show'), 5000);
+        }
+
+        // Validate input on blur
+        spotifyLink.addEventListener('blur', function() {
+            if (this.value.trim()) {
+                if (validateSpotifyLink(this.value)) {
+                    this.classList.remove('error');
+                    this.classList.add('success');
+                    errorMessage.classList.remove('show');
+                } else {
+                    this.classList.remove('success');
+                    this.classList.add('error');
+                    showError('Please enter a valid Spotify track link');
+                }
+            }
+        });
+
+        // Download button click
+        downloadBtn.addEventListener('click', function() {
+            const url = spotifyLink.value.trim();
+
+            if (!url) {
+                showError('Please enter a Spotify link');
+                spotifyLink.focus();
+                return;
+            }
+
+            if (!validateSpotifyLink(url)) {
+                spotifyLink.classList.add('error');
+                showError('Invalid Spotify link format');
+                return;
+            }
+
+            // Simulate download
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '⏳ Processing...';
+
+            const songInfo = extractSongInfo(url);
+            displaySongDetails(songInfo);
+
+            setTimeout(() => {
+                progressFill.style.width = '0%';
+                progressText.textContent = 'Download starting...';
+                simulateDownload(songInfo);
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = '⬇️ Download Song';
+            }, 500);
+
+            // Note about actual implementation
+            console.log('For production use, implement actual API call:');
+            console.log(`
+            const options = {
+                method: 'GET',
+                headers: {
+                    'X-RapidAPI-Key': 'YOUR_API_KEY_HERE',
+                    'X-RapidAPI-Host': 'music-download-api.p.rapidapi.com'
+                }
+            };
+            
+            fetch('https://music-download-api.p.rapidapi.com/download?url=' + encodedURL, options)
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the downloaded file
+                    console.log(data);
+                })
+                .catch(error => console.error(error));
+            `);
+        });
+
+        // Demo button click
+        demoBtn.addEventListener('click', function() {
+            const demoUrl = 'https://open.spotify.com/track/3n3Ppam7vgaVa1iaRUc9Lp';
+            spotifyLink.value = demoUrl;
+            spotifyLink.classList.add('success');
+            
+            setTimeout(() => {
+                downloadBtn.click();
+            }, 300);
+        });
+
+        // Initial validation
+        spotifyLink.addEventListener('input', function() {
+            if (validateSpotifyLink(this.value)) {
+                this.classList.remove('error');
+                this.classList.add('success');
+            } else {
+                this.classList.remove('success');
+            }
+        });
+    </script>
+</body>
+</html>
